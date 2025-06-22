@@ -1,0 +1,688 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+/**
+ * @title QuantumTicTacToe - First Principles & SCAMPER Reimagined
+ * @dev A revolutionary tic-tac-toe implementation using First Principles thinking and SCAMPER methodology
+ * 
+ * FIRST PRINCIPLES ANALYSIS:
+ * - What is the fundamental purpose? Strategic pattern formation
+ * - What are the core constraints? 3x3 grid, turn-based, win conditions
+ * - What assumptions can we challenge? Linear time, binary states, single reality
+ * 
+ * SCAMPER METHODOLOGY APPLIED:
+ * S - SUBSTITUTE: Replace binary moves with probabilistic quantum states
+ * C - COMBINE: Merge multiple game dimensions and temporal mechanics  
+ * A - ADAPT: Incorporate DeFi yield farming and NFT evolution
+ * M - MODIFY: Variable board sizes and dynamic win conditions
+ * P - PUT TO OTHER USES: Educational tool, economic experiment, art canvas
+ * E - ELIMINATE: Remove turn restrictions, add parallel realities
+ * R - REVERSE: Allow move undoing, time travel, causality loops
+ */
+
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract QuantumTicTacToe is ERC721, ReentrancyGuard, Ownable {
+    
+    // FIRST PRINCIPLE: Fundamental game elements
+    struct QuantumCell {
+        mapping(address => uint256) probability;  // Player's probability claim (0-10000 basis points)
+        mapping(address => uint256) energy;      // Energy invested in cell
+        address dominantPlayer;                  // Current controlling player
+        uint256 totalEnergy;                     // Total energy in cell
+        uint256 lastModified;                    // Timestamp of last change
+        bool isCollapsed;                        // Whether superposition collapsed
+    }
+    
+    // SCAMPER - SUBSTITUTE: Replace fixed board with dynamic dimensions
+    struct GameDimension {
+        uint256 width;
+        uint256 height;
+        uint256 winLength;           // Length needed to win (3 for classic)
+        uint256 temporalLayers;      // Number of time dimensions
+        bool allowDiagonal;
+        bool allowWrapping;          // Pac-man style board wrapping
+    }
+    
+    // SCAMPER - COMBINE: Economic + Gaming mechanics
+    struct EconomicLayer {
+        uint256 stakingRewards;      // Accumulated staking rewards
+        uint256 yieldMultiplier;     // Based on game complexity
+        uint256 nftEvolutionPoints;  // Points for NFT enhancement
+        mapping(address => uint256) playerContributions;
+        mapping(address => uint256) lastClaim;
+    }
+    
+    // SCAMPER - ADAPT: Multi-dimensional game state
+    struct QuantumGame {
+        mapping(uint256 => mapping(uint256 => mapping(uint256 => QuantumCell))) cells; // [x][y][timeLayer]
+        GameDimension dimensions;
+        EconomicLayer economics;
+        address[] players;
+        mapping(address => uint256) playerEnergy;
+        mapping(address => uint256) temporalPosition; // Current time layer
+        uint256 gameId;
+        uint256 creationTime;
+        GameStatus status;
+        uint256 complexityScore;     // Affects rewards
+        bytes32 realityHash;         // Quantum state identifier
+        uint256 totalMoves;
+        mapping(address => bool) hasCollapsed; // Per-player collapse state
+    }
+    
+    enum GameStatus { 
+        QUANTUM_SUPERPOSITION,    // Game in quantum state
+        PARTIAL_COLLAPSE,         // Some elements collapsed
+        CLASSICAL_RESOLVED,       // Traditional end state
+        TEMPORAL_PARADOX,         // Time travel created paradox
+        ECONOMIC_COMPLETION       // Ended via economic victory
+    }
+    
+    // SCAMPER - MODIFY: Dynamic victory conditions
+    struct VictoryCondition {
+        uint256 requiredAlignment;    // Cells in a row needed
+        uint256 energyThreshold;      // Minimum energy per cell
+        uint256 temporalSpan;         // Time layers spanned
+        bool requiresMonopoly;        // Must control 100% of aligned cells
+        uint256 economicValue;        // Minimum staked value
+    }
+    
+    // SCAMPER - PUT TO OTHER USES: Educational and artistic features
+    struct LearningMetrics {
+        uint256 strategicDecisions;
+        uint256 quantumCollapses;
+        uint256 temporalManipulations;
+        uint256 economicOptimizations;
+        mapping(string => uint256) conceptsMastered;
+    }
+    
+    // State variables
+    mapping(uint256 => QuantumGame) public games;
+    mapping(address => LearningMetrics) public playerLearning;
+    mapping(uint256 => VictoryCondition[]) public gameVictoryConditions;
+    mapping(bytes32 => uint256) public realityToGame;
+    
+    uint256 public gameCounter;
+    uint256 public constant BASE_ENERGY = 1000;
+    uint256 public constant ENERGY_DECAY_RATE = 50; // Per time unit
+    uint256 public temporalManipulationCost = 0.01 ether;
+    uint256 public quantumCollapseCost = 0.005 ether;
+    
+    // SCAMPER - ELIMINATE: Remove traditional constraints
+    bool public allowTimeTravel = true;
+    bool public allowParallelRealities = true;
+    bool public allowEnergyTransfer = true;
+    
+    // Events - SCAMPER methodology applied
+    event QuantumMoveExecuted(uint256 indexed gameId, address indexed player, uint256 x, uint256 y, uint256 timeLayer, uint256 probability);
+    event RealityCollapsed(uint256 indexed gameId, bytes32 oldReality, bytes32 newReality);
+    event TemporalJump(uint256 indexed gameId, address indexed player, uint256 fromLayer, uint256 toLayer);
+    event EconomicVictory(uint256 indexed gameId, address indexed winner, uint256 totalValue);
+    event ParadoxCreated(uint256 indexed gameId, string paradoxType);
+    event LearningMilestone(address indexed player, string concept, uint256 level);
+    event NFTEvolved(uint256 indexed tokenId, uint256 newTraits);
+    
+    constructor() ERC721("QuantumTicTacToe", "QTT") {}
+    
+    // FIRST PRINCIPLES: Core game creation with fundamental parameters
+    function createQuantumGame(
+        uint256 width,
+        uint256 height, 
+        uint256 winLength,
+        uint256 temporalLayers,
+        bool allowDiagonal,
+        bool allowWrapping
+    ) external payable returns (uint256) {
+        require(msg.value >= calculateCreationCost(width, height, temporalLayers), "Insufficient creation fee");
+        require(width >= 3 && height >= 3, "Minimum 3x3 board");
+        require(temporalLayers >= 1 && temporalLayers <= 10, "1-10 temporal layers");
+        
+        uint256 gameId = gameCounter++;
+        QuantumGame storage game = games[gameId];
+        
+        game.dimensions = GameDimension({
+            width: width,
+            height: height,
+            winLength: winLength,
+            temporalLayers: temporalLayers,
+            allowDiagonal: allowDiagonal,
+            allowWrapping: allowWrapping
+        });
+        
+        game.gameId = gameId;
+        game.creationTime = block.timestamp;
+        game.status = GameStatus.QUANTUM_SUPERPOSITION;
+        game.complexityScore = calculateComplexityScore(width, height, temporalLayers);
+        game.realityHash = keccak256(abi.encodePacked(gameId, block.timestamp, msg.sender));
+        
+        // Initialize economic layer
+        game.economics.yieldMultiplier = game.complexityScore;
+        
+        // Set up dynamic victory conditions based on board complexity
+        setupDynamicVictoryConditions(gameId);
+        
+        realityToGame[game.realityHash] = gameId;
+        
+        emit QuantumMoveExecuted(gameId, msg.sender, 0, 0, 0, 0); // Creation event
+        
+        return gameId;
+    }
+    
+    // SCAMPER - SUBSTITUTE: Probabilistic moves instead of binary placement
+    function executeQuantumMove(
+        uint256 gameId,
+        uint256 x,
+        uint256 y,
+        uint256 timeLayer,
+        uint256 probability,
+        uint256 energyInvestment
+    ) external payable nonReentrant {
+        QuantumGame storage game = games[gameId];
+        require(game.status == GameStatus.QUANTUM_SUPERPOSITION || game.status == GameStatus.PARTIAL_COLLAPSE, "Game not in playable state");
+        require(x < game.dimensions.width && y < game.dimensions.height, "Invalid coordinates");
+        require(timeLayer < game.dimensions.temporalLayers, "Invalid time layer");
+        require(probability > 0 && probability <= 10000, "Probability must be 1-10000 basis points");
+        require(energyInvestment >= 100, "Minimum energy investment required");
+        require(msg.value >= calculateMoveCost(energyInvestment, timeLayer), "Insufficient move fee");
+        
+        QuantumCell storage cell = game.cells[x][y][timeLayer];
+        
+        // First Principles: Energy conservation and probability normalization
+        uint256 playerCurrentProb = cell.probability[msg.sender];
+        uint256 totalProbAfter = getTotalCellProbability(cell) - playerCurrentProb + probability;
+        require(totalProbAfter <= 10000, "Total probability cannot exceed 100%");
+        
+        // Update cell state
+        cell.probability[msg.sender] = probability;
+        cell.energy[msg.sender] += energyInvestment;
+        cell.totalEnergy += energyInvestment;
+        cell.lastModified = block.timestamp;
+        
+        // Economic layer update
+        game.economics.playerContributions[msg.sender] += energyInvestment;
+        game.playerEnergy[msg.sender] += energyInvestment;
+        game.totalMoves++;
+        
+        // Add player to game if not already present
+        if (game.playerEnergy[msg.sender] == energyInvestment) {
+            game.players.push(msg.sender);
+        }
+        
+        // Check for dominant player in cell
+        updateCellDominance(cell);
+        
+        // Learning metrics update
+        playerLearning[msg.sender].strategicDecisions++;
+        
+        // Check for spontaneous quantum collapse
+        if (shouldTriggerQuantumCollapse(cell)) {
+            collapseCell(gameId, x, y, timeLayer);
+        }
+        
+        // Check victory conditions
+        checkDynamicVictoryConditions(gameId);
+        
+        emit QuantumMoveExecuted(gameId, msg.sender, x, y, timeLayer, probability);
+    }
+    
+    // SCAMPER - REVERSE: Allow temporal manipulation and move undoing
+    function executeTemporalJump(
+        uint256 gameId,
+        uint256 newTimeLayer
+    ) external payable {
+        require(allowTimeTravel, "Time travel disabled");
+        require(msg.value >= temporalManipulationCost, "Insufficient temporal fee");
+        
+        QuantumGame storage game = games[gameId];
+        require(newTimeLayer < game.dimensions.temporalLayers, "Invalid time layer");
+        
+        uint256 oldLayer = game.temporalPosition[msg.sender];
+        game.temporalPosition[msg.sender] = newTimeLayer;
+        
+        // Temporal mechanics: moving backwards has consequences
+        if (newTimeLayer < oldLayer) {
+            // Moving to past - create potential paradox
+            checkForTemporalParadox(gameId, msg.sender, oldLayer, newTimeLayer);
+        }
+        
+        playerLearning[msg.sender].temporalManipulations++;
+        
+        emit TemporalJump(gameId, msg.sender, oldLayer, newTimeLayer);
+    }
+    
+    // SCAMPER - COMBINE: Forced quantum collapse with economic stakes
+    function forceQuantumCollapse(
+        uint256 gameId,
+        uint256 x,
+        uint256 y,
+        uint256 timeLayer
+    ) external payable {
+        require(msg.value >= quantumCollapseCost, "Insufficient collapse fee");
+        
+        QuantumGame storage game = games[gameId];
+        QuantumCell storage cell = game.cells[x][y][timeLayer];
+        require(!cell.isCollapsed, "Cell already collapsed");
+        
+        collapseCell(gameId, x, y, timeLayer);
+        playerLearning[msg.sender].quantumCollapses++;
+        
+        // Economic reward for forcing collapse
+        game.economics.playerContributions[msg.sender] += msg.value / 2;
+    }
+    
+    // SCAMPER - ADAPT: Energy transfer between players
+    function transferEnergy(
+        uint256 gameId,
+        address recipient,
+        uint256 amount
+    ) external {
+        require(allowEnergyTransfer, "Energy transfer disabled");
+        
+        QuantumGame storage game = games[gameId];
+        require(game.playerEnergy[msg.sender] >= amount, "Insufficient energy");
+        require(amount >= 50, "Minimum transfer amount");
+        
+        game.playerEnergy[msg.sender] -= amount;
+        game.playerEnergy[recipient] += amount;
+        
+        // Economic implications
+        game.economics.playerContributions[recipient] += amount / 4; // 25% bonus for receiving
+    }
+    
+    // SCAMPER - MODIFY: Dynamic board expansion
+    function expandGameDimensions(
+        uint256 gameId,
+        uint256 newWidth,
+        uint256 newHeight,
+        uint256 additionalTemporalLayers
+    ) external payable {
+        require(msg.value >= calculateExpansionCost(newWidth, newHeight, additionalTemporalLayers), "Insufficient expansion fee");
+        
+        QuantumGame storage game = games[gameId];
+        require(newWidth >= game.dimensions.width, "Cannot shrink width");
+        require(newHeight >= game.dimensions.height, "Cannot shrink height");
+        
+        game.dimensions.width = newWidth;
+        game.dimensions.height = newHeight;
+        game.dimensions.temporalLayers += additionalTemporalLayers;
+        
+        // Recalculate complexity and rewards
+        game.complexityScore = calculateComplexityScore(newWidth, newHeight, game.dimensions.temporalLayers);
+        game.economics.yieldMultiplier = game.complexityScore;
+        
+        // Add new victory conditions for expanded board
+        setupAdditionalVictoryConditions(gameId, newWidth, newHeight);
+    }
+    
+    // FIRST PRINCIPLES: Fundamental victory checking across all dimensions
+    function checkDynamicVictoryConditions(uint256 gameId) internal {
+        QuantumGame storage game = games[gameId];
+        VictoryCondition[] storage conditions = gameVictoryConditions[gameId];
+        
+        for (uint256 i = 0; i < conditions.length; i++) {
+            VictoryCondition storage condition = conditions[i];
+            
+            // Check each player for this victory condition
+            for (uint256 p = 0; p < game.players.length; p++) {
+                address player = game.players[p];
+                
+                if (checkPlayerVictoryCondition(gameId, player, condition)) {
+                    declareVictory(gameId, player, i);
+                    return;
+                }
+            }
+        }
+        
+        // Check for economic victory
+        checkEconomicVictory(gameId);
+    }
+    
+    function checkPlayerVictoryCondition(
+        uint256 gameId,
+        address player,
+        VictoryCondition storage condition
+    ) internal view returns (bool) {
+        QuantumGame storage game = games[gameId];
+        
+        // Multi-dimensional victory checking
+        for (uint256 timeLayer = 0; timeLayer < game.dimensions.temporalLayers; timeLayer++) {
+            if (checkAlignmentInLayer(gameId, player, timeLayer, condition)) {
+                return true;
+            }
+        }
+        
+        // Cross-temporal victory checking
+        if (condition.temporalSpan > 1) {
+            return checkCrossTemporalAlignment(gameId, player, condition);
+        }
+        
+        return false;
+    }
+    
+    function checkAlignmentInLayer(
+        uint256 gameId,
+        address player,
+        uint256 timeLayer,
+        VictoryCondition storage condition
+    ) internal view returns (bool) {
+        QuantumGame storage game = games[gameId];
+        
+        // Check horizontal alignments
+        for (uint256 y = 0; y < game.dimensions.height; y++) {
+            if (checkHorizontalAlignment(gameId, player, y, timeLayer, condition)) return true;
+        }
+        
+        // Check vertical alignments
+        for (uint256 x = 0; x < game.dimensions.width; x++) {
+            if (checkVerticalAlignment(gameId, player, x, timeLayer, condition)) return true;
+        }
+        
+        // Check diagonal alignments if allowed
+        if (game.dimensions.allowDiagonal) {
+            if (checkDiagonalAlignments(gameId, player, timeLayer, condition)) return true;
+        }
+        
+        return false;
+    }
+    
+    // SCAMPER - PUT TO OTHER USES: Educational progress tracking
+    function updateLearningProgress(address player, string memory concept) internal {
+        LearningMetrics storage learning = playerLearning[player];
+        learning.conceptsMastered[concept]++;
+        
+        // Milestone rewards
+        if (learning.conceptsMastered[concept] == 10) {
+            emit LearningMilestone(player, concept, 10);
+            // Award bonus energy or NFT evolution points
+            // This could be expanded into a full educational system
+        }
+    }
+    
+    // SCAMPER - ELIMINATE: Remove gas limitations through batching
+    function executeBatchMoves(
+        uint256 gameId,
+        uint256[] memory xCoords,
+        uint256[] memory yCoords,
+        uint256[] memory timeLayers,
+        uint256[] memory probabilities,
+        uint256[] memory energyInvestments
+    ) external payable nonReentrant {
+        require(xCoords.length == yCoords.length, "Coordinate arrays length mismatch");
+        require(xCoords.length == timeLayers.length, "Time layer array length mismatch");
+        require(xCoords.length == probabilities.length, "Probability array length mismatch");
+        require(xCoords.length == energyInvestments.length, "Energy array length mismatch");
+        require(xCoords.length <= 10, "Maximum 10 moves per batch");
+        
+        uint256 totalCost = 0;
+        for (uint256 i = 0; i < xCoords.length; i++) {
+            totalCost += calculateMoveCost(energyInvestments[i], timeLayers[i]);
+        }
+        require(msg.value >= totalCost, "Insufficient batch fee");
+        
+        for (uint256 i = 0; i < xCoords.length; i++) {
+            // Execute each move (simplified internal version)
+            executeBatchMove(gameId, xCoords[i], yCoords[i], timeLayers[i], probabilities[i], energyInvestments[i]);
+        }
+        
+        // Check victory conditions once after all moves
+        checkDynamicVictoryConditions(gameId);
+    }
+    
+    // Economic functions - SCAMPER COMBINE methodology
+    function claimStakingRewards(uint256 gameId) external nonReentrant {
+        QuantumGame storage game = games[gameId];
+        require(game.economics.playerContributions[msg.sender] > 0, "No contributions to claim");
+        
+        uint256 timeElapsed = block.timestamp - game.economics.lastClaim[msg.sender];
+        uint256 rewards = calculateStakingRewards(
+            game.economics.playerContributions[msg.sender],
+            timeElapsed,
+            game.economics.yieldMultiplier
+        );
+        
+        game.economics.lastClaim[msg.sender] = block.timestamp;
+        game.economics.stakingRewards += rewards;
+        
+        // Transfer rewards (simplified - would integrate with token contract)
+        payable(msg.sender).transfer(rewards);
+    }
+    
+    // NFT Evolution - SCAMPER ADAPT methodology
+    function evolveGameNFT(uint256 gameId) external {
+        QuantumGame storage game = games[gameId];
+        require(game.status == GameStatus.CLASSICAL_RESOLVED || game.status == GameStatus.ECONOMIC_COMPLETION, "Game not finished");
+        require(game.economics.playerContributions[msg.sender] >= 1000, "Insufficient contribution for NFT");
+        
+        uint256 tokenId = totalSupply();
+        _mint(msg.sender, tokenId);
+        
+        // NFT evolution based on game complexity and player performance
+        uint256 evolutionPoints = game.economics.playerContributions[msg.sender] / 100;
+        game.economics.nftEvolutionPoints = evolutionPoints;
+        
+        emit NFTEvolved(tokenId, evolutionPoints);
+    }
+    
+    // Utility functions implementing First Principles calculations
+    function calculateComplexityScore(uint256 width, uint256 height, uint256 temporalLayers) internal pure returns (uint256) {
+        return (width * height * temporalLayers) + (width + height) * 10;
+    }
+    
+    function calculateCreationCost(uint256 width, uint256 height, uint256 temporalLayers) internal pure returns (uint256) {
+        return (width * height * temporalLayers * 0.001 ether) + 0.01 ether;
+    }
+    
+    function calculateMoveCost(uint256 energyInvestment, uint256 timeLayer) internal pure returns (uint256) {
+        return (energyInvestment * 0.0001 ether) + (timeLayer * 0.001 ether);
+    }
+    
+    function calculateExpansionCost(uint256 newWidth, uint256 newHeight, uint256 additionalLayers) internal pure returns (uint256) {
+        return ((newWidth * newHeight * additionalLayers) * 0.002 ether) + 0.05 ether;
+    }
+    
+    function calculateStakingRewards(uint256 contribution, uint256 timeElapsed, uint256 multiplier) internal pure returns (uint256) {
+        return (contribution * timeElapsed * multiplier) / (365 days * 10000); // Simplified APY calculation
+    }
+    
+    // Helper functions for quantum mechanics
+    function getTotalCellProbability(QuantumCell storage cell) internal view returns (uint256) {
+        // This would iterate through all players in a real implementation
+        // Simplified for this example
+        return cell.totalEnergy > 0 ? (cell.totalEnergy * 100) / 1000 : 0;
+    }
+    
+    function updateCellDominance(QuantumCell storage cell) internal {
+        // Determine dominant player based on energy and probability
+        // Simplified implementation
+        if (cell.totalEnergy > 500) {
+            cell.dominantPlayer = address(0); // Would be calculated properly
+        }
+    }
+    
+    function shouldTriggerQuantumCollapse(QuantumCell storage cell) internal view returns (bool) {
+        return cell.totalEnergy > 2000 || getTotalCellProbability(cell) > 9500;
+    }
+    
+    function collapseCell(uint256 gameId, uint256 x, uint256 y, uint256 timeLayer) internal {
+        QuantumGame storage game = games[gameId];
+        QuantumCell storage cell = game.cells[x][y][timeLayer];
+        
+        cell.isCollapsed = true;
+        
+        // Update reality hash
+        bytes32 oldReality = game.realityHash;
+        game.realityHash = keccak256(abi.encodePacked(game.realityHash, x, y, timeLayer, block.timestamp));
+        
+        emit RealityCollapsed(gameId, oldReality, game.realityHash);
+    }
+    
+    function checkForTemporalParadox(uint256 gameId, address player, uint256 oldLayer, uint256 newLayer) internal {
+        // Check if temporal jump creates logical inconsistencies
+        if (oldLayer > newLayer + 2) {
+            // Significant backward jump - potential paradox
+            QuantumGame storage game = games[gameId];
+            game.status = GameStatus.TEMPORAL_PARADOX;
+            emit ParadoxCreated(gameId, "Temporal causality violation");
+        }
+    }
+    
+    function checkEconomicVictory(uint256 gameId) internal {
+        QuantumGame storage game = games[gameId];
+        
+        // Economic victory: controlling majority of game's economic value
+        uint256 totalGameValue = address(this).balance;
+        for (uint256 i = 0; i < game.players.length; i++) {
+            address player = game.players[i];
+            if (game.economics.playerContributions[player] > totalGameValue / 2) {
+                game.status = GameStatus.ECONOMIC_COMPLETION;
+                emit EconomicVictory(gameId, player, game.economics.playerContributions[player]);
+                return;
+            }
+        }
+    }
+    
+    function declareVictory(uint256 gameId, address winner, uint256 conditionIndex) internal {
+        QuantumGame storage game = games[gameId];
+        game.status = GameStatus.CLASSICAL_RESOLVED;
+        
+        // Distribute economic rewards
+        uint256 totalRewards = game.economics.stakingRewards;
+        uint256 winnerShare = totalRewards * 60 / 100; // 60% to winner
+        
+        // Would implement proper reward distribution here
+    }
+    
+    // Placeholder functions for alignment checking (would be fully implemented)
+    function checkHorizontalAlignment(uint256 gameId, address player, uint256 y, uint256 timeLayer, VictoryCondition storage condition) internal view returns (bool) {
+        // Implementation for horizontal line checking across quantum probabilities
+        return false; // Simplified
+    }
+    
+    function checkVerticalAlignment(uint256 gameId, address player, uint256 x, uint256 timeLayer, VictoryCondition storage condition) internal view returns (bool) {
+        // Implementation for vertical line checking
+        return false; // Simplified
+    }
+    
+    function checkDiagonalAlignments(uint256 gameId, address player, uint256 timeLayer, VictoryCondition storage condition) internal view returns (bool) {
+        // Implementation for diagonal checking
+        return false; // Simplified
+    }
+    
+    function checkCrossTemporalAlignment(uint256 gameId, address player, VictoryCondition storage condition) internal view returns (bool) {
+        // Implementation for cross-time victory conditions
+        return false; // Simplified
+    }
+    
+    function setupDynamicVictoryConditions(uint256 gameId) internal {
+        // Setup victory conditions based on board complexity
+        QuantumGame storage game = games[gameId];
+        VictoryCondition[] storage conditions = gameVictoryConditions[gameId];
+        
+        // Standard alignment victory
+        conditions.push(VictoryCondition({
+            requiredAlignment: game.dimensions.winLength,
+            energyThreshold: 500,
+            temporalSpan: 1,
+            requiresMonopoly: false,
+            economicValue: 1000
+        }));
+        
+        // Cross-temporal victory (if multiple time layers)
+        if (game.dimensions.temporalLayers > 1) {
+            conditions.push(VictoryCondition({
+                requiredAlignment: 3,
+                energyThreshold: 300,
+                temporalSpan: game.dimensions.temporalLayers,
+                requiresMonopoly: true,
+                economicValue: 2000
+            }));
+        }
+    }
+    
+    function setupAdditionalVictoryConditions(uint256 gameId, uint256 newWidth, uint256 newHeight) internal {
+        // Add new victory conditions for expanded boards
+        VictoryCondition[] storage conditions = gameVictoryConditions[gameId];
+        
+        // Large formation victory for bigger boards
+        if (newWidth >= 5 && newHeight >= 5) {
+            conditions.push(VictoryCondition({
+                requiredAlignment: 5,
+                energyThreshold: 1000,
+                temporalSpan: 1,
+                requiresMonopoly: false,
+                economicValue: 5000
+            }));
+        }
+    }
+    
+    function executeBatchMove(uint256 gameId, uint256 x, uint256 y, uint256 timeLayer, uint256 probability, uint256 energyInvestment) internal {
+        // Simplified version of executeQuantumMove for batch processing
+        QuantumGame storage game = games[gameId];
+        QuantumCell storage cell = game.cells[x][y][timeLayer];
+        
+        cell.probability[msg.sender] = probability;
+        cell.energy[msg.sender] += energyInvestment;
+        cell.totalEnergy += energyInvestment;
+        cell.lastModified = block.timestamp;
+        
+        game.economics.playerContributions[msg.sender] += energyInvestment;
+        game.playerEnergy[msg.sender] += energyInvestment;
+        game.totalMoves++;
+        
+        emit QuantumMoveExecuted(gameId, msg.sender, x, y, timeLayer, probability);
+    }
+    
+    // View functions for game state queries
+    function getGameState(uint256 gameId) external view returns (
+        GameDimension memory dimensions,
+        GameStatus status,
+        uint256 complexityScore,
+        bytes32 realityHash,
+        uint256 totalMoves,
+        address[] memory players
+    ) {
+        QuantumGame storage game = games[gameId];
+        return (
+            game.dimensions,
+            game.status,
+            game.complexityScore,
+            game.realityHash,
+            game.totalMoves,
+            game.players
+        );
+    }
+    
+    function getCellState(uint256 gameId, uint256 x, uint256 y, uint256 timeLayer, address player) external view returns (
+        uint256 probability,
+        uint256 energy,
+        address dominantPlayer,
+        uint256 totalEnergy,
+        bool isCollapsed
+    ) {
+        QuantumCell storage cell = games[gameId].cells[x][y][timeLayer];
+        return (
+            cell.probability[player],
+            cell.energy[player],
+            cell.dominantPlayer,
+            cell.totalEnergy,
+            cell.isCollapsed
+        );
+    }
+    
+    function getPlayerLearning(address player) external view returns (
+        uint256 strategicDecisions,
+        uint256 quantumCollapses,
+        uint256 temporalManipulations,
+        uint256 economicOptimizations
+    ) {
+        LearningMetrics storage learning = playerLearning[player];
+        return (
+            learning.strategicDecisions,
+            learning.quantumCollapses,
+            learning.temporalManipulations,
+            learning.economicOptimizations
+        );
+    }
+}
